@@ -2,18 +2,23 @@ from textual.app import App, ComposeResult
 from textual.reactive import reactive
 from widgets.tree_nav import TreeNav
 from widgets.main_block import MainBlock
+from widgets.search_area import SearchArea
 from textual.widgets import Header, Footer
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 from datetime import datetime
-import copy
 
 class GetMeDatApp(App):
     CSS_PATH = "./styles/app.tcss"
     
+    BINDINGS = [
+        ("ctrl+r", "send_request", "Send Request"),
+        ("ctrl+f", "focus_url", "Focus URL Input"),
+    ]
+    
     current_url: reactive[str] = reactive("")
     current_method: reactive[str] = reactive("GET")
     request_headers: reactive[Dict[str, str]] = reactive({})
-    request_body: reactive[str] = reactive("")
+    request_body: reactive[Dict[str, Any]] = reactive({})
     
     response_data: reactive[Dict[Any, Any]] = reactive({})
     response_headers: reactive[Dict[str, str]] = reactive({})
@@ -32,7 +37,7 @@ class GetMeDatApp(App):
         yield Footer()
     
     def update_request(self, url: str = None, method: str = None, 
-                      headers: Dict[str, str] = None, body: str = None) -> None:
+                      headers: Dict[str, str] = None, body: Dict[str, Any] = None) -> None:
         if url is not None:
             self.current_url = url
         if method is not None:
@@ -70,6 +75,22 @@ class GetMeDatApp(App):
         self.error_message = ""
         self.is_loading = False
         self.timestamp = ""
+    
+    def action_send_request(self) -> None:
+        try:
+            search_area = self.query_one("SearchArea")  
+            button = search_area.query_one("#send-request-btn")
+            button.action_press()
+        except Exception as e:
+            self.notify(f"Error sending request: {e}", severity="error")
+    
+    def action_focus_url(self) -> None:
+        try:
+            search_area = self.query_one("SearchArea")
+            url_input = search_area.query_one("#url-input")
+            url_input.focus()
+        except Exception as e:
+            self.notify(f"Error focusing URL input: {e}", severity="error")
 
 if __name__ == "__main__":
     app = GetMeDatApp()

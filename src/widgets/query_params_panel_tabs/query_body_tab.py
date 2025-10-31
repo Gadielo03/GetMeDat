@@ -3,6 +3,7 @@ from textual.app import ComposeResult
 from textual.widget import Widget
 from textual.widgets import TextArea, Static, Button
 from textual.containers import Vertical, Horizontal
+from services.request_client import http_client 
 
 
 class QueryBodyTab(Widget):
@@ -29,7 +30,6 @@ class QueryBodyTab(Widget):
     def on_text_area_changed(self, event: TextArea.Changed) -> None:
         if event.text_area.id == "body-textarea":
             self.update_json_status()
-    
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "save-body-btn":
             self.save_body()
@@ -38,14 +38,17 @@ class QueryBodyTab(Widget):
         if not self.is_valid_json():
             self.notify("Cannot save: Invalid JSON", severity="error", timeout=3)
             return
+
+        body = self.get_body_as_json()
+        if body is None:
+            body = {}
+            self.notify("Empty body saved", severity="information", timeout=3)
+        else:
+            self.notify("Body saved successfully!", severity="information", timeout=3)
+        http_client.set_body(body)
+        self.app.update_request(body=body)
         
-        body = self.get_body()
-        if not body.strip():
-            self.notify("Cannot save: Empty body", severity="warning", timeout=3)
-            return
-    
-        self.notify("Body saved successfully!", severity="information", timeout=3)
-    
+
     def update_json_status(self) -> None:
         textarea = self.query_one("#body-textarea", TextArea)
         status = self.query_one("#json-status", Static)
@@ -71,6 +74,15 @@ class QueryBodyTab(Widget):
     def get_body(self) -> str:
         textarea = self.query_one("#body-textarea", TextArea)
         return textarea.text
+
+    def get_body_as_json(self) -> dict | None:
+        text = self.get_body().strip()
+        if not text:
+            return None
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            return None
     
     def is_valid_json(self) -> bool:
         text = self.get_body().strip()
@@ -81,12 +93,3 @@ class QueryBodyTab(Widget):
             return True
         except json.JSONDecodeError:
             return False
-    
-    def get_json(self) -> dict | list | None:
-        text = self.get_body().strip()
-        if not text:
-            return None
-        try:
-            return json.loads(text)
-        except json.JSONDecodeError:
-            return None

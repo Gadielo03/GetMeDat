@@ -54,19 +54,19 @@ class HttpClient():
         self.response = self.session.get(self.url, timeout=self.timeout,params=self.params, headers=self.headers)
 
     def post_request(self):
-        self.response = self.session.post(self.url, timeout=self.timeout,params=self.params, json=self.body, headers=self.headers).json()
+        self.response = self.session.post(self.url, timeout=self.timeout,params=self.params, json=self.body, headers=self.headers)
 
     def delete_request(self):
-        self.response = self.session.delete(self.url, timeout=self.timeout,params=self.params, json=self.body, headers=self.headers).json()
+        self.response = self.session.delete(self.url, timeout=self.timeout,params=self.params, json=self.body, headers=self.headers)
 
     def put_request(self):
-        self.response = self.session.put(self.url, timeout=self.timeout,params=self.params, json=self.body, headers=self.headers).json()
+        self.response = self.session.put(self.url, timeout=self.timeout,params=self.params, json=self.body, headers=self.headers)
 
     def patch_request(self):
-        self.response = self.session.patch(self.url, timeout=self.timeout,params=self.params, json=self.body, headers=self.headers).json()
+        self.response = self.session.patch(self.url, timeout=self.timeout,params=self.params, json=self.body, headers=self.headers)
 
     def head_request(self):
-        self.response = self.session.head(self.url, timeout=self.timeout,params=self.params, json=self.body, headers=self.headers).json()
+        self.response = self.session.head(self.url, timeout=self.timeout,params=self.params, headers=self.headers)
 
     def get_response(self):
         return self.response

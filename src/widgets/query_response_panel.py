@@ -1,8 +1,8 @@
 import json
 from textual.app import ComposeResult
 from textual.widget import Widget
-from textual.widgets import Label, TabbedContent, TabPane, Pretty, Static
-from textual.containers import Vertical
+from textual.widgets import TabbedContent, TabPane, Pretty, Static
+from textual.containers import VerticalScroll
 
 class QueryResponsePanel(Widget):
     """Display the Query Response."""
@@ -17,7 +17,7 @@ class QueryResponsePanel(Widget):
     def compose(self) -> ComposeResult:
         with TabbedContent(initial="response-tab"):
             with TabPane("Response", id="response-tab"):
-                with Vertical():
+                with VerticalScroll():
                     yield Static("No request made", id="status-info")
                     yield Pretty({}, id="response-body")
             with TabPane("Headers", id="response-headers-tab"):
@@ -27,43 +27,19 @@ class QueryResponsePanel(Widget):
         self.get_child_by_type(TabbedContent).active = tab
 
     def on_mount(self) -> None:
-        self.watch(self.app, "current_url", self.update_url_display)
-        self.watch(self.app, "current_method", self.update_method_display) 
+        self.watch(self.app, "current_url", self.refresh_status_info)
+        self.watch(self.app, "current_method", self.refresh_status_info)
         self.watch(self.app, "response_data", self.update_response_display)
-        self.watch(self.app, "response_headers", self.update_headers_display)
-        self.watch(self.app, "status_code", self.update_status_display)
-        self.watch(self.app, "is_loading", self.update_loading_display)
+        self.watch(self.app, "response_headers", self.refresh_headers_info)
+        self.watch(self.app, "status_code", self.refresh_status_info)
+        self.watch(self.app, "is_loading", self.refresh_status_info)
         self.watch(self.app, "error_message", self.update_error_display)
         
-        self.log("QueryResponsePanel mounted and watching reactive variables")
-    
-    def update_url_display(self, url: str) -> None:
-        self.log(f"URL changed: {url}")
-        self.refresh_status_info()
-    
-    def update_method_display(self, method: str) -> None:
-        self.log(f"Method changed: {method}")
-        self.refresh_status_info()
-    
-    def update_status_display(self, status: int) -> None:
-        self.log(f"Status changed: {status}")
-        self.refresh_status_info()
-    
-    def update_loading_display(self, loading: bool) -> None:
-        self.log(f"Loading changed: {loading}")
-        self.refresh_status_info()
-    
     def update_response_display(self, data: dict) -> None:
-        self.log(f"Response data changed: {len(str(data))} chars")
         response_body = self.query_one("#response-body", Pretty)
         response_body.update(data)
     
-    def update_headers_display(self, headers: dict) -> None:
-        self.log(f"Headers changed: {len(headers)} headers")
-        self.refresh_headers_info()
-    
     def update_error_display(self, error: str) -> None:
-        self.log(f"Error changed: {error}")
         if error:
             response_body = self.query_one("#response-body", Pretty)
             response_body.update({"error": error})
