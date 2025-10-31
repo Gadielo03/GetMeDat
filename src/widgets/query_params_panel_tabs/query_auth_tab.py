@@ -2,6 +2,7 @@ from textual.app import ComposeResult
 from textual.widget import Widget
 from textual.widgets import TextArea, Static, Button
 from textual.containers import Vertical, Horizontal
+from services.request_client import http_client
 
 
 class QueryAuthTab(Widget):
@@ -21,7 +22,6 @@ class QueryAuthTab(Widget):
             )
     
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle save button press."""
         if event.button.id == "save-auth-btn":
             self.save_auth()
     
@@ -31,6 +31,8 @@ class QueryAuthTab(Widget):
             self.notify("Cannot save: Empty auth data", severity="warning", timeout=3)
             return
         
+        token = self.get_auth()
+        http_client.set_header("Authorization", f"Bearer {token}")
         self.notify("Auth data saved successfully!", severity="information", timeout=3)
     
     def get_auth(self) -> str:

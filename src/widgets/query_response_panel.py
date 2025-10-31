@@ -3,6 +3,7 @@ from textual.app import ComposeResult
 from textual.widget import Widget
 from textual.widgets import TabbedContent, TabPane, Pretty, Static
 from textual.containers import VerticalScroll
+from services.file_service import *
 
 class QueryResponsePanel(Widget):
     """Display the Query Response."""
@@ -22,6 +23,8 @@ class QueryResponsePanel(Widget):
                     yield Pretty({}, id="response-body")
             with TabPane("Headers", id="response-headers-tab"):
                 yield Pretty({}, id="response-headers")
+        config = load_config()
+        self.notify(f"Loaded config: {config['current_url']}", severity="information", timeout=2)
     
     def action_show_tab(self, tab: str) -> None:
         self.get_child_by_type(TabbedContent).active = tab
@@ -47,25 +50,28 @@ class QueryResponsePanel(Widget):
     def refresh_status_info(self) -> None:
         status_info = self.query_one("#status-info", Static)
         
-        if self.app.is_loading:
-            status_info.update(f"Loading... | {self.app.current_method} {self.app.current_url}")
-        elif self.app.status_code > 0:
-            color = self.get_status_color(self.app.status_code)
-            timestamp = ""
-            if self.app.timestamp:
-                try:
-                    from datetime import datetime
-                    dt = datetime.fromisoformat(self.app.timestamp)
-                    timestamp = dt.strftime("%H:%M:%S")
-                except:
-                    pass
-            
-            status_text = f"[{color}]{self.app.status_code}[/] | {self.app.current_method} {self.app.current_url}"
-            if timestamp:
-                status_text += f" | {timestamp}"
-            status_info.update(status_text)
-        else:
-            status_info.update("No request made")
+        try:
+            if self.app.is_loading:
+                status_info.update(f"Loading... | {self.app.current_method} {self.app.current_url}")
+            elif self.app.status_code > 0:
+                color = self.get_status_color(self.app.status_code)
+                timestamp = ""
+                if self.app.timestamp:
+                    try:
+                        from datetime import datetime
+                        dt = datetime.fromisoformat(self.app.timestamp)
+                        timestamp = dt.strftime("%H:%M:%S")
+                    except:
+                        pass
+                
+                status_text = f"[{color}]{self.app.status_code}[/] | {self.app.current_method} {self.app.current_url}"
+                if timestamp:
+                    status_text += f" | {timestamp}"
+                status_info.update(status_text)
+            else:
+                status_info.update("No request made")
+        except Exception as e:
+            status_info.update(f"Error updating status: {str(e)}")
     
     def refresh_headers_info(self) -> None:
         headers_info = {

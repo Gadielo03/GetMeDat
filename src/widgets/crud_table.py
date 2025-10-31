@@ -3,11 +3,17 @@ from textual.widget import Widget
 from textual.widgets import Static, Button, Input, DataTable
 from textual.containers import Horizontal
 from textual.reactive import reactive
+from textual.message import Message
 
 class CrudTable(Widget):
     """A CRUD Table widget for managing key-value pairs."""
 
     DEFAULT_CLASSES = "crud-table"
+    
+    class DataChanged(Message):
+        def __init__(self, data: dict) -> None:
+            self.data = data.copy()
+            super().__init__()
     
     data = reactive({})
     selected_row = None  
@@ -75,6 +81,8 @@ class CrudTable(Widget):
             key_input.value = ""
             value_input.value = ""
             key_input.focus()
+            
+            self.post_message(self.DataChanged(self.data))
     
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if event.input.id in [self.key_input_id, self.value_input_id]:
@@ -131,6 +139,8 @@ class CrudTable(Widget):
         self.original_value = None
         self.clear_inputs()
         self.set_button_mode("add")
+        
+        self.post_message(self.DataChanged(self.data))
     
     def modify_item(self) -> None:
         if self.selected_row is None:
@@ -160,6 +170,8 @@ class CrudTable(Widget):
         self.original_value = None
         self.clear_inputs()
         self.set_button_mode("add")
+        
+        self.post_message(self.DataChanged(self.data))
     
     def set_button_mode(self, mode: str) -> None:
         self.button_mode = mode
@@ -206,3 +218,5 @@ class CrudTable(Widget):
         table.clear()
         for key, value in data.items():
             table.add_row(key, value)
+        
+        self.post_message(self.DataChanged(self.data))

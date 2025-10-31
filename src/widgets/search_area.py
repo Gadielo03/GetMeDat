@@ -24,7 +24,7 @@ class SearchArea(Widget):
             classes="http-method-select",
             id="method-select"
         )
-        yield Input(placeholder="Enter URL", classes="search-bar-input", id="url-input")
+        yield Input(placeholder="Enter URL", value=self.app.current_url, classes="search-bar-input", id="url-input")
         yield Button("→", variant="primary", id="send-request-btn", classes="send-btn")
 
     def normalize_url(self, url: str) -> str:
@@ -80,31 +80,20 @@ class SearchArea(Widget):
             method_map[self.http_method]()
             response = http_client.get_response()
 
-            if response:
-                try:
-                    response_data = response.json()
-                except:
-                    response_data = {"text": response.text}
-                
-                self.app.update_response(
-                    data=response_data,
-                    headers=dict(response.headers),
-                    status=response.status_code,
-                    error="",
-                    loading=False
-                )
-                
-                self.notify(f"Response: {response.status_code}", severity="information", timeout=3)
-            else:
-                # No hay respuesta
-                self.app.update_response(
-                    data={"error": "No response received"},
-                    headers={},
-                    status=0,
-                    error="No response received",
-                    loading=False
-                )
-                self.notify("No response received", severity="warning", timeout=3)
+            try:
+                response_data = response.json()
+            except:
+                response_data = {"text": response.text}
+            
+            self.app.update_response(
+                data=response_data,
+                headers=dict(response.headers),
+                status=response.status_code,
+                error="",
+                loading=False
+            )
+            
+            self.notify(f"Response: {response.status_code}", severity="information", timeout=3)
             
         except Exception as e:
             # Error en la petición

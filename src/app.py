@@ -6,6 +6,7 @@ from widgets.search_area import SearchArea
 from textual.widgets import Header, Footer
 from typing import Dict, Any
 from datetime import datetime
+from services.file_service import *
 
 class GetMeDatApp(App):
     CSS_PATH = "./styles/app.tcss"
@@ -13,25 +14,28 @@ class GetMeDatApp(App):
     BINDINGS = [
         ("ctrl+r", "send_request", "Send Request"),
         ("ctrl+f", "focus_url", "Focus URL Input"),
+        ("ctrl+d", "select_method", "Select HTTP Method")
     ]
-    
-    current_url: reactive[str] = reactive("")
-    current_method: reactive[str] = reactive("GET")
-    request_headers: reactive[Dict[str, str]] = reactive({})
-    request_body: reactive[Dict[str, Any]] = reactive({})
-    
-    response_data: reactive[Dict[Any, Any]] = reactive({})
-    response_headers: reactive[Dict[str, str]] = reactive({})
-    status_code: reactive[int] = reactive(0)
-    error_message: reactive[str] = reactive("")
-    is_loading: reactive[bool] = reactive(False)
-    timestamp: reactive[str] = reactive("")
-    
-    show_timestamps: reactive[bool] = reactive(True)
-    auto_format_json: reactive[bool] = reactive(True)
-    
+
+    config = load_config()
+
+    current_url: reactive[str] = reactive(config.get("current_url", ""))
+    current_method: reactive[str] = reactive(config.get("current_method", "GET"))
+    request_headers: reactive[Dict[str, str]] = reactive(config.get("request_headers", {}))
+    request_body: reactive[Dict[str, Any]] = reactive(config.get("request_body", {}))
+
+    response_data: reactive[Dict[Any, Any]] = reactive(config.get("response_data", {}))
+    response_headers: reactive[Dict[str, str]] = reactive(config.get("response_headers", {}))
+    status_code: reactive[int] = reactive(config.get("status_code", 0))
+    error_message: reactive[str] = reactive(config.get("error_message", ""))
+    is_loading: reactive[bool] = reactive(config.get("is_loading", False))
+    timestamp: reactive[str] = reactive(config.get("timestamp", ""))
+
+    show_timestamps: reactive[bool] = reactive(config.get("show_timestamps", True))
+    auto_format_json: reactive[bool] = reactive(config.get("auto_format_json", True))
+
     def compose(self) -> ComposeResult:
-        yield Header()  
+        yield Header(id="app-header")  
         yield TreeNav(classes="box")
         yield MainBlock()
         yield Footer()
@@ -92,6 +96,15 @@ class GetMeDatApp(App):
         except Exception as e:
             self.notify(f"Error focusing URL input: {e}", severity="error")
 
+    def action_select_method(self) -> None:
+        try:
+            search_area = self.query_one("SearchArea")
+            method_select = search_area.query_one("#method-select")
+            method_select.focus()
+        except Exception as e:
+            self.notify(f"Error focusing method select: {e}", severity="error")
+
 if __name__ == "__main__":
+    initalize_storage()
     app = GetMeDatApp()
     app.run()
