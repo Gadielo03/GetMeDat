@@ -20,7 +20,8 @@ class QueryBodyTab(Widget):
             yield TextArea(
                 placeholder="Enter request body here (JSON format)...", 
                 id="body-textarea",
-                language="json"
+                language="json",
+                text=json.dumps(http_client.get_body() or {})
             )
             yield Static("Valid JSON", id="json-status", classes="json-valid")
     

@@ -13,6 +13,10 @@ class HttpClient():
     def set_header(self, key, value):
         self.headers[key] = value
         self.session.headers.update(self.headers)
+        
+    def set_headers(self, headers: dict):
+        self.headers = headers
+        self.session.headers.update(self.headers)
 
     def get_headers(self):
         return self.headers

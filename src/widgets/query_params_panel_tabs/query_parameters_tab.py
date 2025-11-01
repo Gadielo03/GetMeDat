@@ -10,6 +10,7 @@ class QueryParametersTab(Widget):
     
     def compose(self) -> ComposeResult:
         yield CrudTable(
+            initial_data=self.app.current_params,
             title="Query Parameters",
             key_placeholder="Parameter Name",
             value_placeholder="Parameter Value",
@@ -18,5 +19,6 @@ class QueryParametersTab(Widget):
     
     def on_crud_table_data_changed(self, event: CrudTable.DataChanged) -> None:
         table_data = event.data
+        self.app.update_request(params=table_data)
         self.app.notify(f"Query parameters updated: {table_data}", severity="information", timeout=2)
         http_client.set_params(params=table_data)

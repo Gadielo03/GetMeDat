@@ -23,6 +23,8 @@ class GetMeDatApp(App):
     current_method: reactive[str] = reactive(config.get("current_method", "GET"))
     request_headers: reactive[Dict[str, str]] = reactive(config.get("request_headers", {}))
     request_body: reactive[Dict[str, Any]] = reactive(config.get("request_body", {}))
+    current_auth: reactive[str] = reactive(config.get("current_auth", ""))
+    current_params: reactive[Dict[str, str]] = reactive(config.get("current_params", {}))
 
     response_data: reactive[Dict[Any, Any]] = reactive(config.get("response_data", {}))
     response_headers: reactive[Dict[str, str]] = reactive(config.get("response_headers", {}))
@@ -41,7 +43,8 @@ class GetMeDatApp(App):
         yield Footer()
     
     def update_request(self, url: str = None, method: str = None, 
-                      headers: Dict[str, str] = None, body: Dict[str, Any] = None) -> None:
+                      headers: Dict[str, str] = None, body: Dict[str, Any] = None,
+                      auth: str = None, params: Dict[str, str] = None) -> None:
         if url is not None:
             self.current_url = url
         if method is not None:
@@ -50,6 +53,10 @@ class GetMeDatApp(App):
             self.request_headers = headers
         if body is not None:
             self.request_body = body
+        if auth is not None:
+            self.current_auth = auth
+        if params is not None:
+            self.current_params = params
     
     def update_response(self, data: Dict[Any, Any] = None, headers: Dict[str, str] = None,
                        status: int = None, error: str = None, loading: bool = None) -> None:
@@ -79,6 +86,25 @@ class GetMeDatApp(App):
         self.error_message = ""
         self.is_loading = False
         self.timestamp = ""
+    
+    def save_current_config(self) -> None:
+        current_config = {
+            "current_url": self.current_url,
+            "current_method": self.current_method,
+            "request_headers": self.request_headers,
+            "request_body": self.request_body,
+            "current_auth": self.current_auth,
+            "current_params": self.current_params,
+            "response_data": self.response_data,
+            "response_headers": self.response_headers,
+            "status_code": self.status_code,
+            "error_message": self.error_message,
+            "is_loading": self.is_loading,
+            "timestamp": self.timestamp,
+            "show_timestamps": self.show_timestamps,
+            "auto_format_json": self.auto_format_json
+        }
+        save_config(current_config)
     
     def action_send_request(self) -> None:
         try:

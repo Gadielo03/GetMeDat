@@ -13,6 +13,8 @@ def initalize_storage() -> None:
         default_config = {
           "current_url": "http://localhost:3000",
           "current_method": "GET",
+          "current_params": {},
+          "current_auth": "",
           "request_headers": {},
           "request_body": {},
           "response_data": {},

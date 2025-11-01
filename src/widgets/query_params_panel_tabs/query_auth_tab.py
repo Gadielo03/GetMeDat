@@ -17,6 +17,7 @@ class QueryAuthTab(Widget):
                 yield Button("Save Auth", variant="success", id="save-auth-btn", classes="save-btn")
             
             yield TextArea(
+                text=self.app.current_auth,
                 placeholder="Enter Bearer token or other auth info here...",
                 id="auth-textarea"
             )
@@ -24,6 +25,11 @@ class QueryAuthTab(Widget):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "save-auth-btn":
             self.save_auth()
+    
+    def on_text_area_changed(self, event) -> None:
+        if event.text_area.id == "auth-textarea":
+            auth_text = event.text_area.text
+            self.app.update_request(auth=auth_text) 
     
     def save_auth(self) -> None:
         auth = self.get_auth()

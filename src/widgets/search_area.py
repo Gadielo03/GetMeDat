@@ -20,7 +20,7 @@ class SearchArea(Widget):
                 ("PATCH", "PATCH"),
                 ("HEAD", "HEAD")
             ],
-            value="GET",
+            value=self.app.current_method,
             classes="http-method-select",
             id="method-select"
         )
@@ -96,7 +96,6 @@ class SearchArea(Widget):
             self.notify(f"Response: {response.status_code}", severity="information", timeout=3)
             
         except Exception as e:
-            # Error en la petición
             self.app.update_response(
                 data={"error": str(e)},
                 headers={},

@@ -171,7 +171,6 @@ SearchArea {
 
 #body-textarea, #auth-textarea {
     height: 1fr;
-    min-height: 20;
     border: solid $accent;
 }
 
