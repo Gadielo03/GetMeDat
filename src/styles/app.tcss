@@ -6,6 +6,39 @@ Screen {
     text-style: bold;
 }
 
+SaveConfigScreen {
+    align: center middle;
+}
+
+.dialog {
+    grid-size: 2 3;
+    grid-gutter: 1 3;
+    grid-rows: 1fr 3;
+    padding: 0 1;
+    width: 80;
+    height: 15;
+    border: thick $background 80%;
+    background: $surface;
+}
+
+#filename-input{
+    column-span: 2;
+}
+
+.modal-title {
+    column-span: 2;
+    row-span:1;
+    height: 1fr;
+    width: 1fr;
+    content-align: center middle;
+}
+
+.dialog-button{
+    column-span:1;
+    width: 100%;
+    row-span: 1;
+}
+
 .box {
     height: 100%;
     border: solid $primary;

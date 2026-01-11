@@ -1,5 +1,6 @@
 from textual.app import App, ComposeResult
 from textual.reactive import reactive
+from widgets.save_config_modal import SaveConfigScreen
 from widgets.tree_nav import TreeNav
 from widgets.main_block import MainBlock
 from widgets.search_area import SearchArea
@@ -14,7 +15,8 @@ class GetMeDatApp(App):
     BINDINGS = [
         ("ctrl+r", "send_request", "Send Request"),
         ("ctrl+f", "focus_url", "Focus URL Input"),
-        ("ctrl+d", "select_method", "Select HTTP Method")
+        ("ctrl+d", "select_method", "Select HTTP Method"),
+        ("ctrl+s", "show_save_config_modal", "Save Configuration"),
     ]
 
     config = load_config()
@@ -87,25 +89,6 @@ class GetMeDatApp(App):
         self.is_loading = False
         self.timestamp = ""
     
-    def save_current_config(self) -> None:
-        current_config = {
-            "current_url": self.current_url,
-            "current_method": self.current_method,
-            "request_headers": self.request_headers,
-            "request_body": self.request_body,
-            "current_auth": self.current_auth,
-            "current_params": self.current_params,
-            "response_data": self.response_data,
-            "response_headers": self.response_headers,
-            "status_code": self.status_code,
-            "error_message": self.error_message,
-            "is_loading": self.is_loading,
-            "timestamp": self.timestamp,
-            "show_timestamps": self.show_timestamps,
-            "auto_format_json": self.auto_format_json
-        }
-        save_config(current_config)
-    
     def action_send_request(self) -> None:
         try:
             search_area = self.query_one("SearchArea")  
@@ -129,6 +112,9 @@ class GetMeDatApp(App):
             method_select.focus()
         except Exception as e:
             self.notify(f"Error focusing method select: {e}", severity="error")
+    
+    def action_show_save_config_modal(self) -> None:
+        self.push_screen(SaveConfigScreen())
 
 if __name__ == "__main__":
     initalize_storage()
